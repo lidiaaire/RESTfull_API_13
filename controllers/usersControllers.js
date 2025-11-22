@@ -1,4 +1,3 @@
-const user = require("../Models/userModels");
 const userModel = require("../Models/userModels");
 
 let USERS = [
@@ -7,7 +6,7 @@ let USERS = [
   { id: 3, name: "Usuario 3", email: "usuario3@example.com" },
 ];
 
-// GET users → obtiene toda la colección
+// GET users → obtiene toda la colección de usuarios desde MongoDB
 const getUsers = async (req, res) => {
   try {
     const data = await userModel.find();
@@ -19,7 +18,7 @@ const getUsers = async (req, res) => {
   }
 };
 
-// GET BY ID  → obtiene un usuario
+// GET BY ID  → obtiene un usuario concreto según su ID
 const getUserById = async (req, res) => {
   try {
     const userId = req.params.id;
@@ -32,7 +31,7 @@ const getUserById = async (req, res) => {
   }
 };
 
-// PATCH →  obtiene un unico usuario
+// PATCH →  actualiza parcialmente un usuario (solo los campos enviados)
 const patchById = async (req, res) => {
   try {
     const userId = req.params.id;
@@ -64,10 +63,10 @@ const patchById = async (req, res) => {
   }
 };
 
-// POST crea un usuario
+// POST → crea un nuevo usuario
 const addUser = async (req, res) => {
   try {
-    const { name, email } = req.body;
+    const { name, email } = req.body; // Recoge datos del body
 
     const newUser = new userModel({
       name,
@@ -83,18 +82,44 @@ const addUser = async (req, res) => {
   }
 };
 
-// DELETE borra un usuario
+// DELETE → elimina un usuario según su ID
 const deleteUser = async (req, res) => {
   try {
     const userId = req.params.id;
     const user = await userModel.findById(userId);
 
     if (!user) {
+      // Si el usuario no existe...
       return res.status(404).send("El usuario no existe");
     }
 
-    await userModel.findByIdAndDelete(userId);
+    await userModel.findByIdAndDelete(userId); // Elimina el usuario de la base de datos
     res.status(200).send({ status: "succeeded", error: null });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ status: "failed", data: null, error: error.message });
+  }
+};
+
+// GET count → obtiene el número total de usuarios
+const countUsers = async (req, res) => {
+  try {
+    const users = await userModel.find();
+    const count = users.length;
+    res.status(200).send({ status: "succeeded", count, error: null });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ status: "failed", data: null, error: error.message });
+  }
+};
+
+// GET usuario por email (solo muestra name como ejemplo)
+const getUsersByEmail = async (req, res) => {
+  try {
+    const users = await userModel.find({}, { name: 1, _id: 0 });
+    res.status(200).send({ status: "succeeded", users, error: null });
   } catch (error) {
     res
       .status(500)
@@ -108,4 +133,6 @@ module.exports = {
   patchById,
   addUser,
   deleteUser,
+  countUsers,
+  getUsersByEmail,
 };
