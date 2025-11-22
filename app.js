@@ -7,17 +7,18 @@ const mongoose = require("mongoose");
 // Esto nos permite obtener la información de configuración de ".env"
 require("dotenv").config();
 
-// Declaramos el puerto donde se levantará el servidor
-const PORT = 3000;
-
-// Importamos el router de usuarios
-const userRouter = require("./router/userRoutes");
-
 // Inicializamos express
 const app = express();
 
+// Declaramos el puerto donde se levantará el servidor
+const PORT = 3000;
+
 // Analizamos los archivos JSON del body
 app.use(express.json());
+
+// Importamos el router de usuarios
+const userRouter = require("./router/userRoutes");
+const productsRoutes = require("./router/productsRoutes");
 
 // Conectamos con Mongo
 const url_mongo = process.env.DATABASE_URL_DEV;
@@ -44,8 +45,9 @@ app.get("/", (req, res) => {
   res.send("API funcionando");
 });
 
-// Montamos el router en /users
+// Montamos los routers
 app.use("/users", userRouter);
+app.use("/products", productsRoutes);
 
 // Levantamos el servidor
 app.listen(PORT, () => {
