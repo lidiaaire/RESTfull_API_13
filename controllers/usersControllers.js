@@ -9,8 +9,8 @@ let USERS = [
 
 // GET users - obtiene toda la colección
 const getUsers = async (req, res) => {
-  const data = await userModel.find();
-  res.status(200).json({ status: "succeeded", data, error: null });
+  const users = await userModel.find();
+  res.send(users);
 };
 
 // GET BY ID  → obtiene un usuario
@@ -21,56 +21,28 @@ const getUserById = async (req, res) => {
 };
 
 // PATCH actualizar parcialmente un usuario
-const patchById = (req, res) => {
-  const userId = parseInt(req.params.id);
-  const { name, email } = req.body;
-
-  const user = USERS.find((user) => user.id === userId);
-
-  if (!user) {
-    return res.status(404).send("El usuario no existe");
-  }
-
-  if (name) {
-    user.name = name;
-  }
-
-  if (email) {
-    user.email = email;
-  }
-
-  res.send(user);
+const patchById = async (req, res) => {
+  const userId = req.params.id;
+  const updatedUser = await userModel.findByIdAndUpdate(
+    userId,
+    req.body,
+    { new: true } // devuelve el actualizado
+  );
+  res.send(updatedUser);
 };
 
 // POST crea un usuario
-const addUser = (req, res) => {
+const addUser = async (req, res) => {
   const { name, email } = req.body;
-  const newIndex = USERS.length + 1;
-
-  const newUser = {
-    id: newIndex,
-    name,
-    email,
-  };
-
-  USERS.push(newUser);
-
+  const newUser = await userModel.create({ name, email });
   res.send(newUser);
 };
 
 // DELETE borra un usuario
-
-const deleteUser = (req, res) => {
-  const userId = parseInt(req.params.id);
-
-  const filteredUsers = USERS.filter((user) => user.id !== userId);
-
-  if (filteredUsers.length === USERS.length) {
-    return res.send("El usuario no existe");
-  }
-
-  USERS = filteredUsers;
-  res.send(USERS);
+const deleteUser = async (req, res) => {
+  const userId = req.params.id;
+  const deletedUser = await userModel.findByIdAndDelete(userId);
+  res.send(deletedUser);
 };
 
 module.exports = {

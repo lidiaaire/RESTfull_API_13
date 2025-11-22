@@ -4,6 +4,9 @@ const express = require("express");
 // Importamos Mongo
 const mongoose = require("mongoose");
 
+// Esto nos permite obtener la información de configuración de ".env"
+require("dotenv").config();
+
 // Declaramos el puerto donde se levantará el servidor
 const PORT = 3000;
 
@@ -16,17 +19,11 @@ const app = express();
 // Analizamos los archivos JSON del body
 app.use(express.json());
 
-// Esto nos permite obtener la informacion de configuracion de ".env"
-require("dotenv").config();
-
+// Conectamos con Mongo
 const url_mongo = process.env.DATABASE_URL_DEV;
-
 console.log("url_mongo =>", url_mongo);
 
-mongoose.connect(url_mongo, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+mongoose.connect(url_mongo);
 
 const db = mongoose.connection;
 
@@ -38,8 +35,8 @@ db.on("connected", () => {
   console.log(`Succecss connect`);
 });
 
-db.on("disconected", () => {
-  console.log(`Mongo is disconected`);
+db.on("disconnected", () => {
+  console.log(`Mongo is disconnected`);
 });
 
 // Ruta simple para comprobar que el servidor responde
