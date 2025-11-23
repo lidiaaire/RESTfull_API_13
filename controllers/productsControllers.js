@@ -165,6 +165,75 @@ const getAveragePrice = async (req, res) => {
   }
 };
 
+// GET /products/:id/sizes → solo tallas del producto
+const getSizesByProductId = async (req, res) => {
+  try {
+    const productId = req.params.id;
+    const product = await Product.findById(productId, "size");
+
+    if (!product) {
+      return res.status(404).json({
+        status: "Error",
+        message: "Producto no encontrado",
+      });
+    }
+
+    const sizes = product.size;
+
+    res.status(200).json({
+      status: "Success",
+      message: "Tallas del producto obtenidas exitosamente",
+      sizes: sizes,
+    });
+  } catch (error) {
+    res.status(400).json({
+      status: "Error",
+      message: "No se pudieron obtener las tallas del producto",
+      error: error.message,
+    });
+  }
+};
+// DELETE /products/:id/color/:color → elimina un color concreto
+const deleteColorByProductId = async (req, res) => {
+  try {
+    const productId = req.params.id;
+    const colorToDelete = req.params.color;
+
+    const product = await Product.findById(productId);
+
+    if (!product) {
+      return res.status(404).json({
+        status: "Error",
+        message: "Producto no encontrado",
+      });
+    }
+
+    const indexOfColor = product.colors.indexOf(colorToDelete);
+
+    if (indexOfColor === -1) {
+      return res.status(404).json({
+        status: "Error",
+        message: "Color no encontrado en el producto",
+      });
+    }
+
+    product.colors.splice(indexOfColor, 1);
+    await product.save();
+
+    res.status(200).json({
+      status: "Success",
+      message: "Color eliminado del producto exitosamente",
+      product,
+    });
+  } catch (error) {
+    res.status(400).json({
+      status: "Error",
+      message: "No se pudo eliminar el color del producto",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   createProduct,
   getAllProducts,
@@ -172,4 +241,6 @@ module.exports = {
   updateProduct,
   deleteProduct,
   getAveragePrice,
+  getSizesByProductId,
+  deleteColorByProductId,
 };
