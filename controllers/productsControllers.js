@@ -1,4 +1,5 @@
 const Product = require("../Models/productsModels");
+const { sendEmail } = require("../services/emailServices");
 
 // POST /products → crear producto
 const createProduct = async (req, res) => {
@@ -34,7 +35,7 @@ const createProduct = async (req, res) => {
 const getAllProducts = async (req, res) => {
   try {
     const products = await Product.find();
-
+    await sendEmail();
     res.status(200).json({
       status: "Success",
       message: "Productos obtenidos correctamente",
