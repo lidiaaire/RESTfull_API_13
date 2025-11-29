@@ -19,6 +19,7 @@ app.use(express.json());
 // Importamos el router de usuarios
 const userRouter = require("./router/userRoutes");
 const productsRoutes = require("./router/productsRoutes");
+const loginRoutes = require("./router/loginRoutes");
 
 // Importamos Swagger
 const swaggerUi = require("swagger-ui-express");
@@ -52,6 +53,7 @@ app.get("/", (req, res) => {
 // Montamos los routers
 app.use("/users", userRouter);
 app.use("/products", productsRoutes);
+app.use("/login", loginRoutes);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerJSDoc));
 
 // Levantamos el servidor

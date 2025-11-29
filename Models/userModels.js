@@ -14,7 +14,13 @@ const userSchema = new Schema({
     required: true,
     match: [/^\S+@\S+\.\S+$/, "Correo Incorrecto"],
   },
+  age: {
+    type: Number,
+    default: 0,
+  },
 });
+
+userSchema.index({ age: 1 });
 
 // REGEX -- Es una expresion regular que se usa para validar los emalis
 

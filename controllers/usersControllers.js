@@ -77,7 +77,7 @@ const patchById = async (req, res) => {
 };
 
 // POST → crea un nuevo usuario
-const addUser = async (req, res) => {
+const createUser = async (req, res) => {
   try {
     const { name, email } = req.body; // Recoge datos del body
 
@@ -145,12 +145,80 @@ const getUsersByEmail = async (req, res) => {
   }
 };
 
+// ------------------------------------------------------------------------------------
+const addUsers = async (req, res) => {
+  try {
+    const totalUsers = 1000000; // Cantidad de usuarios a insertar
+
+    for (let i = 0; i < totalUsers; i++) {
+      const randomAge = Math.floor(Math.random() * 100); // Edades 0-100
+
+      const newUser = new userModel({
+        name: `User_${Math.floor(Math.random() * 1000)}`, // Nombre aleatorio
+        email: `user${Math.floor(Math.random() * 1000)}@gmail.com`, // Email aleatorio
+        age: randomAge,
+      });
+
+      await newUser.save(); // Inserta en Mongo
+    }
+
+    return res.status(201).json({
+      message: "Se insertaron los usuarios correctamente",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: error.message,
+    });
+  }
+};
+
+// GET → obtiene usuarios que coincidan con una edad concreta
+const getUsersByAge = async (req, res) => {
+  try {
+    const { age } = req.params; // Obtiene la edad de la URL
+    const numericAge = Number(age);
+
+    if (Number.isNaN(numericAge)) {
+      return res.status(400).json({
+        status: "failed",
+        data: null,
+        error: "La edad debe ser un número",
+      });
+    }
+
+    // Busca todos los usuarios que coincidan con esa edad
+    const users = await userModel.find({ age: numericAge });
+
+    if (users.length === 0) {
+      return res.status(404).json({
+        status: "failed",
+        data: null,
+        message: "No se encontraron usuarios con esa edad",
+      });
+    }
+
+    return res.status(200).json({
+      status: "succeeded",
+      data: users,
+      error: null,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: "failed",
+      data: null,
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   getUsers,
   getUserById,
   patchById,
-  addUser,
+  createUser,
   deleteUser,
   countUsers,
   getUsersByEmail,
+  addUsers,
+  getUsersByAge,
 };
