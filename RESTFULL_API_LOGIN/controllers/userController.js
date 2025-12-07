@@ -4,14 +4,13 @@ const bcrypt = require("bcrypt");
 const addUser = async (req, res) => {
   try {
     const { name, email, password, edad, role } = req.body;
-    const passwordCrypt = await bcrypt.hash(password, 10);
 
     const user = new User({
-      name,
-      email,
-      passwordCrypt,
-      edad,
-      role,
+      name: name,
+      email: email,
+      password: await bcrypt.hash(password, 10),
+      edad: edad,
+      role: role,
     });
 
     await user.save();
@@ -21,12 +20,57 @@ const addUser = async (req, res) => {
       data: user,
     });
   } catch (error) {
+    if (error.code === 11000) {
+      return res.status(200).json({
+        status: "Error",
+        message: "El email ya existe",
+      });
+    }
     res.status(400).json({
-      status: "error",
+      status: "Error",
       message: "No se pudo crear el usuario",
       error: error.message,
     });
   }
 };
 
-module.exports = { addUser };
+const login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    // Buscamos por email si existe en la base de datos
+    const user = await User.findOne({ email: email });
+    // En el caso de que si, entramos en el if, si no, devolvemos el mensaje por else
+    if (user) {
+      // Comparamos las contraseñas y si nos devuelve un true, es que es correcto
+      // De lo contrario, devuelve un false y manda el mensaje
+      const validPassword = await bcrypt.compare(password, user.password);
+      console.log(validPassword);
+
+      if (validPassword) {
+        // TODO: Generar un token
+        return res.status(200).json({
+          status: "succeeded",
+          data: user,
+        });
+      } else {
+        return res.status(200).json({
+          status: "Error",
+          message: "Email y contraseña no coinciden",
+        });
+      }
+    } else {
+      return res.status(200).json({
+        status: "Error",
+        message: "Email y contraseña no coinciden",
+      });
+    }
+  } catch (error) {
+    res.status(400).json({
+      status: "Error",
+      message: "No se ha podido hacer login",
+      error: error.message,
+    });
+  }
+};
+
+module.exports = { addUser, login };
