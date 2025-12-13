@@ -1,7 +1,9 @@
 const User = require("../models/userModel");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 const addUser = async (req, res) => {
+  np;
   try {
     const { name, email, password, edad, role } = req.body;
 
@@ -48,9 +50,19 @@ const login = async (req, res) => {
 
       if (validPassword) {
         // TODO: Generar un token
+        const payload = {
+          userId: user._id,
+          nombre: user.name,
+          email: user.email,
+        };
+        const token = generateToken(payload, false);
+        const token_refresh = generateToken(payload, true);
+
         return res.status(200).json({
           status: "succeeded",
           data: user,
+          token: token,
+          token_refresh: token_refresh,
         });
       } else {
         return res.status(200).json({
